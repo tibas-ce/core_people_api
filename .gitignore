@@ -35,3 +35,6 @@
 
 # IDE
 .vscode/
+
+# Test
+coverage/
