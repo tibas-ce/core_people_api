@@ -33,15 +33,35 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
-# gem "rack-cors"
+gem "rack-cors"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "dotenv-rails"
+
+  # TDD Stack
+  gem "rspec-rails", "~> 6.1"
+  gem "factory_bot_rails"
+  gem "faker"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+end
+
+group :test do
+  # shoulda-matchers: Oferece 'matchers' de teste fáceis de ler e concisos
+  gem "shoulda-matchers", "~> 6.0"
+  # database_cleaner-active_record: Ferramenta essencial para garantir que o banco de dados seja limpo entre os testes, assegurando que um teste não interfira no outro
+  gem "database_cleaner-active_record"
+  # simplecov:  Usada para medir a cobertura de código dos seus testes (quantas linhas do seu código estão sendo executadas pelos testes)
+  gem "simplecov", require: false
+end
+
+group :development do
+  # bullet: Monitora o código durante o desenvolvimento
+  gem "bullet"
 end
