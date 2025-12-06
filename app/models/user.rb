@@ -11,4 +11,8 @@ class User < ApplicationRecord
               with: URI::Mailto::EMAIL_REGEXP,
               message: 'Deve ser um email válido'
             }
+
+  validates :name,
+            presence: true,
+            length: { minimum: 2, maximum: 100 }
 end
