@@ -2,7 +2,7 @@ class User < ApplicationRecord
   has_secure_password
 
   # Normalizações
-  before_save { self.email = email.downcase.strip }
+  before_save :normalize_email
 
   validates :email,
             presence: true,
@@ -22,6 +22,10 @@ class User < ApplicationRecord
             if: :password_required?
 
   private
+
+  def normalize_email
+    self.email = email.to_s.downcase.strip
+  end
 
   def password_required?
     password_digest.blank? || password.present?
