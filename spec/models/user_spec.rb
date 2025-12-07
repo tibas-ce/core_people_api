@@ -1,15 +1,10 @@
 require "rails_helper"
 
 RSpec.describe User, type: :model do
-  subject {
-    User.create!(
-      name: "Usuário Teste",
-      email: "email@example.com",
-      password: "senha123"
-    )
-  }
   
   describe "validations" do
+    subject { build(:user) }
+
     it "é válido com atributos válidos" do
       user = User.new(
         email: "teste@exemplo.com",
