@@ -49,4 +49,18 @@ RSpec.describe User, type: :model do
       expect(user).to be_valid
     end
   end
+
+  describe "factory" do
+    it "tem um factory válido" do
+      user = build(:user)
+      expect(user).to be_valid
+    end
+
+    it "cria um usuário com factory" do
+      user = create(:user)
+      expect(user).to be_persisted
+      expect(user.email).to be_present
+      expect(user.name).to be_present
+    end
+  end
 end
