@@ -8,7 +8,7 @@ class User < ApplicationRecord
             presence: true,
             uniqueness: { case_sensitive: false },
             format: {
-              with: URI::Mailto::EMAIL_REGEXP,
+              with: URI::MailTo::EMAIL_REGEXP,
               message: 'Deve ser um email válido'
             }
 
