@@ -36,7 +36,7 @@ RSpec.describe User, type: :model do
     it "requer senha na criação" do
       user = User.new(email: 'test@example.com', name: 'Test User')
       expect(user).not_to be_valid
-      expect(user.errors[:password]).to include("Não pode estar em branco")
+      expect(user.errors[:password]).to include(I18n.t("errors.messages.blank"))
     end
 
     it "não requer senha na atualização" do
