@@ -21,10 +21,11 @@ RSpec.describe JsonWebToken do
     end
 
     it "permite o tempo de expiração personalizado" do
-      token = JsonWebToken.encode(payload)
+      custom_exp = 2.hours.from_now
+      token = JsonWebToken.encode(payload, custom_exp)
       decoded = JWT.decode(token, ENV['JWT_SECRET_KEY'], true, algorithm: 'HS256')[0]
 
-      expect(decoded['exp']).to be_within(5).of(1.hour.from_now.to_i)
+      expect(decoded['exp']).to be_within(5).of(custom_exp.to_i)
     end
   end
 
