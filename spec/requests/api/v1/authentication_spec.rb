@@ -1,0 +1,99 @@
+require "rails_helper"
+
+RSpec.describe "API::V1::Authentication", type: :request do
+  describe "POST /api/v1/signup" do
+    let(:valid_params) do
+      {
+        user: {
+          name: "Tibério Ferreira",
+          email: "tiberio@exemplo.com",
+          password: "senha123",
+          password_confirmation: "senha123"
+        }
+      }
+    end
+
+    context "com parâmetros válidos" do
+      it "criando um novo usuário" do
+        expect {
+          post "/api/v1/signup", params: valid_params
+      }.to change(User, :count).by(1)
+      end
+
+      it "retorna um JWT token" do
+        post "/api/v1/signup", params: valid_params
+        json = JSON.parse(response.body)
+
+        expect(response).to have_http_status(:created)
+        expect(json["token"]).to be_present
+        expect(json["token"]).to be_a(String)
+      end
+
+      it "retorna um JWT token válido" do
+        post "/api/v1/signup", params: valid_params
+        json = JSON.parse(response.body)
+
+        decoded = JsonWebToken.decode(json["token"])
+        expect(decoded[:user_id]).to eq(User.last.id)
+      end
+    end
+
+    context "com parâmetros inválidos" do
+      it "não cria usuário com e-mail inválido" do
+        invalid_params = valid_params.deep_dup
+        invalid_params[:user][:email] = "invalid_email"
+
+        expect {
+          post "/api/v1/signup", params: invalid_params
+      }.not_to change(User, :count)
+      expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "não cria usuário com password pequeno" do
+        invalid_params = valid_params.deep_dup
+        invalid_params[:user][:password] = "123"
+        invalid_params[:user][:password_confirmation] = "123"
+
+        expect {
+          post "/api/v1/signup", params: invalid_params
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "não cria usuário com incompatibilidade de password" do
+        invalid_params = valid_params.deep_dup
+        invalid_params[:user][:password_confirmation] = "different"
+
+        expect {
+          post "/api/v1/signup", params: invalid_params
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "retorna mensagens de erros" do
+        invalid_params = valid_params.deep_dup
+        invalid_params[:user][:email] = ""
+
+        post "/api/v1/signup", params: invalid_params
+        json = JSON.parse(response.body)
+
+        expect(json["errors"]).to be_present
+        expect(json["errors"]).to be_an(Array)
+      end
+    end
+
+    context "com email duplicado" do
+      it "não cria usuário com e-mail existente" do
+        create(:user, email: "tiberio@exemplo.com")
+
+        expect {
+          post "/api/v1/signup", params: valid_params
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
+end
