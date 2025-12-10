@@ -109,7 +109,7 @@ describe "POST/api/v1/login" do
 
   let(:valid_params) do
     {
-      email: "tiberio@exemplo",
+      email: "tiberio@exemplo.com",
       password: "senha123"
     }
   end
