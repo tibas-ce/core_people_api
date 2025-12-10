@@ -97,3 +97,67 @@ RSpec.describe "API::V1::Authentication", type: :request do
     end
   end
 end
+
+describe "POST/api/v1/login" do
+  let!(:user) {
+    create(
+      :user,
+      email: "tiberio@exemplo.com",
+      password: "senha123"
+    )
+  }
+
+  let(:valid_params) do
+    {
+      email: "tiberio@exemplo",
+      password: "senha123"
+    }
+  end
+
+  context "com credenciais válidas" do
+    it "retorna um JWT token" do
+      post "/api/v1/login", params: valid_params
+      json = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:ok)
+      expect(json["token"]).to be_present
+      expect(json["user"]["email"]).to eq("tiberio@exemplo")
+    end
+
+    it "retorna um JWT token válido" do
+      post "/api/v1/login", params: valid_params
+      json = JSON.parse(response.body)
+
+      decoded = JsonWebToken.decode(json["token"])
+      expect(decoded[:user]).to eq(user_id)
+    end
+
+    it "é case insensitive para email" do
+      post "/api/v1/login", params: { email: "TIBERIO@EXEMPLO.COM", password: "senha123" }
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  context "com credenciais inválidas" do
+    it "retorno não autorizado com senha errada" do
+      post "/api/v1/login", params: { email: "tiberio@exemplo.com", password: "senha_errada" }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(json["error"]).to eq('Email ou senha inválidos')
+    end
+
+    it "retorno não autorizado com senha errada" do
+      post "/api/v1/login", params: { email: "naoexiste@exemplo.com", password: "senha123" }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(json["error"]).to eq('Email ou senha inválidos')
+    end
+
+    it "retorna bad request com parâmetros ausentes" do
+      post "/api/v1/login", params: { email: "tiberio@exemplo.com" }
+
+      expect(response).to have_http_status(:bad_request)
+    end
+  end
+end
