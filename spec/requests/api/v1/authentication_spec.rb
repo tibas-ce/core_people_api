@@ -121,7 +121,7 @@ describe "POST/api/v1/login" do
 
       expect(response).to have_http_status(:ok)
       expect(json["token"]).to be_present
-      expect(json["user"]["email"]).to eq("tiberio@exemplo")
+      expect(json["user"]["email"]).to eq("tiberio@exemplo.com")
     end
 
     it "retorna um JWT token válido" do
@@ -142,13 +142,15 @@ describe "POST/api/v1/login" do
   context "com credenciais inválidas" do
     it "retorno não autorizado com senha errada" do
       post "/api/v1/login", params: { email: "tiberio@exemplo.com", password: "senha_errada" }
+      json = JSON.parse(response.body)
 
       expect(response).to have_http_status(:unauthorized)
       expect(json["error"]).to eq('Email ou senha inválidos')
     end
 
-    it "retorno não autorizado com senha errada" do
+    it "retorna não autorizado com email inexistente" do
       post "/api/v1/login", params: { email: "naoexiste@exemplo.com", password: "senha123" }
+      json = JSON.parse(response.body)
 
       expect(response).to have_http_status(:unauthorized)
       expect(json["error"]).to eq('Email ou senha inválidos')
