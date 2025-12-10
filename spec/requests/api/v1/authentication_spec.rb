@@ -46,7 +46,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
         expect {
           post "/api/v1/signup", params: invalid_params
       }.not_to change(User, :count)
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "não cria usuário com password pequeno" do
@@ -58,7 +58,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
           post "/api/v1/signup", params: invalid_params
       }.not_to change(User, :count)
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "não cria usuário com incompatibilidade de password" do
@@ -69,7 +69,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
           post "/api/v1/signup", params: invalid_params
       }.not_to change(User, :count)
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "retorna mensagens de erros" do
@@ -92,13 +92,13 @@ RSpec.describe "API::V1::Authentication", type: :request do
           post "/api/v1/signup", params: valid_params
       }.not_to change(User, :count)
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
 end
 
-describe "POST/api/v1/login" do
+describe "POST /api/v1/login" do
   let!(:user) {
     create(
       :user,
@@ -109,7 +109,7 @@ describe "POST/api/v1/login" do
 
   let(:valid_params) do
     {
-      email: "tiberio@exemplo",
+      email: "tiberio@exemplo.com",
       password: "senha123"
     }
   end
@@ -121,7 +121,7 @@ describe "POST/api/v1/login" do
 
       expect(response).to have_http_status(:ok)
       expect(json["token"]).to be_present
-      expect(json["user"]["email"]).to eq("tiberio@exemplo")
+      expect(json["user"]["email"]).to eq("tiberio@exemplo.com")
     end
 
     it "retorna um JWT token válido" do
@@ -129,26 +129,31 @@ describe "POST/api/v1/login" do
       json = JSON.parse(response.body)
 
       decoded = JsonWebToken.decode(json["token"])
-      expect(decoded[:user]).to eq(user_id)
+      expect(decoded[:user_id]).to eq(user.id)
     end
 
     it "é case insensitive para email" do
       post "/api/v1/login", params: { email: "TIBERIO@EXEMPLO.COM", password: "senha123" }
+      json = JSON.parse(response.body)
 
+      expect(json["token"]).to be_present
       expect(response).to have_http_status(:ok)
+      expect(json["user"]["email"]).to eq("tiberio@exemplo.com")
     end
   end
 
   context "com credenciais inválidas" do
     it "retorno não autorizado com senha errada" do
       post "/api/v1/login", params: { email: "tiberio@exemplo.com", password: "senha_errada" }
+      json = JSON.parse(response.body)
 
       expect(response).to have_http_status(:unauthorized)
       expect(json["error"]).to eq('Email ou senha inválidos')
     end
 
-    it "retorno não autorizado com senha errada" do
+    it "retorna não autorizado com email inexistente" do
       post "/api/v1/login", params: { email: "naoexiste@exemplo.com", password: "senha123" }
+      json = JSON.parse(response.body)
 
       expect(response).to have_http_status(:unauthorized)
       expect(json["error"]).to eq('Email ou senha inválidos')
