@@ -46,7 +46,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
         expect {
           post "/api/v1/signup", params: invalid_params
       }.not_to change(User, :count)
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "não cria usuário com password pequeno" do
@@ -58,7 +58,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
           post "/api/v1/signup", params: invalid_params
       }.not_to change(User, :count)
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "não cria usuário com incompatibilidade de password" do
@@ -69,7 +69,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
           post "/api/v1/signup", params: invalid_params
       }.not_to change(User, :count)
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "retorna mensagens de erros" do
@@ -92,7 +92,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
           post "/api/v1/signup", params: valid_params
       }.not_to change(User, :count)
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
