@@ -98,7 +98,7 @@ RSpec.describe "API::V1::Authentication", type: :request do
   end
 end
 
-describe "POST/api/v1/login" do
+describe "POST /api/v1/login" do
   let!(:user) {
     create(
       :user,
@@ -129,13 +129,16 @@ describe "POST/api/v1/login" do
       json = JSON.parse(response.body)
 
       decoded = JsonWebToken.decode(json["token"])
-      expect(decoded[:user]).to eq(user_id)
+      expect(decoded[:user_id]).to eq(user.id)
     end
 
     it "é case insensitive para email" do
       post "/api/v1/login", params: { email: "TIBERIO@EXEMPLO.COM", password: "senha123" }
+      json = JSON.parse(response.body)
 
+      expect(json["token"]).to be_present
       expect(response).to have_http_status(:ok)
+      expect(json["user"]["email"]).to eq("tiberio@exemplo.com")
     end
   end
 
