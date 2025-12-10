@@ -23,6 +23,31 @@ module Api
         end
       end
 
+      def login
+        # Validar parâmetros obrigatórios
+        unless params[:email].present? && params[:password].present?
+          return render json: { error: "Email e senha são obrigatórios" },
+                        status: :bad_request
+        end
+
+        # Buscar usuário de forma case-insensitive
+        @user = User.find_by("LOWER(email) = ?", params[:email].downcase)
+
+        # Verifica a senha
+        if @user&.authenticate(params[:password])
+          token = JsonWebToken.encode(user_id: @user.id)
+
+          render json: {
+            token: token,
+            user: user_response(@user)
+          }, status: :ok
+        else
+          render json: {
+            error: "Email ou senha inválidos"
+          }, status: :unauthorized
+        end
+      end
+
       private
       # Strong params: garante que apenas atributos permitidos sejam enviados
       def signup_params
