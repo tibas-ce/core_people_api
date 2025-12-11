@@ -1,6 +1,9 @@
 module Api
   module V1
     class AuthenticationController < ApplicationController
+      # Executa a autenticação somente antes do endpoint /me
+      before_action :authenticate_user!, only: [ :me ]
+
       # POST /api/v1/signup
       # Cria um novo usuário e retorna um JWT junto com seus dados
       def signup
@@ -46,6 +49,13 @@ module Api
             error: "Email ou senha inválidos"
           }, status: :unauthorized
         end
+      end
+
+      # Retorna os dados do usuário que está logado
+      def me
+        render json: {
+          user: user_response(current_user)
+        }, status: :ok
       end
 
       private
