@@ -166,3 +166,45 @@ describe "POST /api/v1/login" do
     end
   end
 end
+
+describe "GET /api/v1/me" do
+  let(:user) { create(:user) }
+  let(:token) { JsonWebToken.encode(user_id: user.id) }
+
+  context "com token válido" do
+    it "retorna dados atuais do usuário" do
+      get '/api/v1/me', headers: { 'Authorization': "Bearer #{token}" }
+        json = JSON.parse(response.body)
+
+        expect(response).to have_http_status(:ok)
+        expect(json['user']['id']).to eq(user.id)
+        expect(json['user']['email']).to eq(user.email)
+        expect(json['user']['name']).to eq(user.name)
+    end
+  end
+
+  context "sem token" do
+    it "retorna não autorizado" do
+      get "/api/v1/me"
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "retorna não autorizado com mensagem de error" do
+      get "/api/v1/me"
+      expect(response).to have_http_status(:unauthorized)
+
+      json = JSON.parse(response.body)
+      expect(json["error"]).to eq("Token inválido ou expirado")
+    end
+  end
+
+  context "com token inválido" do
+    it "retorna não autorizado com mensagem de erro" do
+      get "/api/v1/me", headers: { "Authorization": "Bearer token_invalido_123" }
+      expect(response).to have_http_status(:unauthorized)
+
+      json = JSON.parse(response.body)
+      expect(json["error"]).to eq("Token inválido ou expirado")
+    end
+  end
+end
