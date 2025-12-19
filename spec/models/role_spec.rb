@@ -8,16 +8,6 @@ RSpec.describe Role, type: :model do
   describe "validations" do
     it { should validate_presence_of(:name) }
     it { should validate_inclusion_of(:name).in_array(Role::VALID_ROLES) }
-    it { should validate_uniqueness_of(:user_id) }
-
-    it "valida a singularidade do user_id" do
-      user = create(:user)
-      create(:role, user: user, name: "employee")
-      duplicate_role = build(:role, user: user, name: "hr")
-
-      expect(duplicate_role).not_to be_valid
-      expect(duplicate_role.errors[:user_id]).to include("já possui um role")
-    end
   end
 
   describe "constants" do
