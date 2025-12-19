@@ -1,7 +1,6 @@
 require "rails_helper"
 
 RSpec.describe User, type: :model do
-  
   describe "validations" do
     subject { build(:user) }
 
@@ -40,13 +39,13 @@ RSpec.describe User, type: :model do
     context "validações de password" do
       it { should validate_presence_of(:password) }
       it { should validate_length_of(:password).is_at_least(6) }
-  
+
       it "requer senha na criação" do
         user = User.new(email: 'test@example.com', name: 'Test User')
         expect(user).not_to be_valid
         expect(user.errors[:password]).to include(I18n.t("errors.messages.blank"))
       end
-  
+
       it "não requer senha na atualização" do
         user = create(:user)
         user.name = 'Atualiza Nome'
@@ -90,6 +89,64 @@ RSpec.describe User, type: :model do
     it "não se autentica com password errado" do
       user = create(:user, password: 'senha123')
       expect(user.authenticate('senha_errada')).to be_falsey
+    end
+  end
+
+  describe "integração de role" do
+    let(:user) { create(:user) }
+
+    it "automaticamente cria role de funcionário na criação de usuários" do
+      new_user = User.create!(
+        name: "Funcionário Teste",
+        email: "teste@example.com",
+        password: "senha123"
+      )
+
+      expect(new_user.role).to be_present
+      expect(new_user.role.name).to eq(Role::EMPLOYEE)
+      expect(new_user.employee?).to be true
+    end
+
+    it "delega métodos de role para o papel" do
+      admin = create(:user, :admin)
+      hr = create(:user, :hr)
+      manager = create(:user, :manager)
+      employee = create(:user)
+
+      expect(admin.admin?).to be true
+      expect(admin.hr?).to be false
+
+      expect(hr.hr?).to be true
+      expect(hr.admin?).to be false
+
+      expect(manager.manager?).to be true
+      expect(manager.employee?).to be false
+
+      expect(employee.employee?).to be true
+      expect(employee.admin?).to be false
+    end
+
+    it "retorna nome do role" do
+      admin = create(:user, :admin)
+      expect(admin.role_name).to eq('admin')
+    end
+
+    it "lida com o usuário sem role graciosamente" do
+      user.role.destroy
+      user.reload
+
+      expect(user.admin?).to be_falsey
+      expect(user.role_name).to be_nil
+    end
+
+    it "destrói role quando usuário é destruído" do
+      user_id = user.id
+      role_id = user.role.id
+
+      user.destroy
+
+      expect(User.find_by(id: user_id)).to be_nil
+      expect(Role.find_by(id: role_id)).to be_nil
     end
   end
 end
