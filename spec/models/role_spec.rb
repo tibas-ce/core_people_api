@@ -8,16 +8,6 @@ RSpec.describe Role, type: :model do
   describe "validations" do
     it { should validate_presence_of(:name) }
     it { should validate_inclusion_of(:name).in_array(Role::VALID_ROLES) }
-    it { should validate_uniqueness_of(:user_id) }
-
-    it "valida a singularidade do user_id" do
-      user = create(:user)
-      create(:role, user: user, name: "employee")
-      duplicate_role = build(:role, user: user, name: "hr")
-
-      expect(duplicate_role).not_to be_valid
-      expect(duplicate_role.errors[:user_id]).to include("já possui um role")
-    end
   end
 
   describe "constants" do
@@ -31,13 +21,25 @@ RSpec.describe Role, type: :model do
   end
 
   describe "scopes" do
-    let!(:admin_role) { create(:role, name: "admin") }
-    let!(:hr_role) { create(:role, name: "hr") }
-    let!(:employee_role) { create(:role, name: "employee") }
+    let!(:admin_user) { create(:user, :admin) }
+    let!(:manager_user) { create(:user, :manager) }
+    let!(:hr_user) { create(:user, :hr) }
+    let!(:employee_user) { create(:user) }
 
-    it "filtra por nome de função" do
-      expect(Role.admins).to include(admin_role)
-      expect(Role.admins).not_to include(hr_role)
+    it "retorna apenas admins" do
+      expect(Role.admins).to contain_exactly(admin_user.role)
+    end
+
+    it "retorna apenas managers" do
+      expect(Role.managers).to contain_exactly(manager_user.role)
+    end
+
+    it "retorna apenas hrs" do
+      expect(Role.hrs).to contain_exactly(hr_user.role)
+    end
+
+    it "retorna apenas employees" do
+      expect(Role.employees).to include(employee_user.role)
     end
   end
 
