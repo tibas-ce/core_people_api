@@ -1,14 +1,35 @@
 class RolePolicy < ApplicationPolicy
-  # NOTE: Up to Pundit v2.3.1, the inheritance was declared as
-  # `Scope < Scope` rather than `Scope < ApplicationPolicy::Scope`.
-  # In most cases the behavior will be identical, but if updating existing
-  # code, beware of possible changes to the ancestors:
-  # https://gist.github.com/Burgestrand/4b4bc22f31c8a95c425fc0e30d7ef1f5
+  # um role pode ser visualizado por:
+  # - administradores e RH (acesso global)
+  # - o próprio usuário dono do role
+  def show?
+    admin_or_hr? || record.user_id == user.id
+  end
+
+  # alterar o role de um usuário impacta permissões do sistema, por isso essa ação é restrita apenas a administradores
+  def update?
+    user.admin?
+  end
+
+  # a listagem de roles é usada para visão geral do sistema, disponível apenas para administradores e RH
+  def index?
+    admin_or_hr?
+  end
+
+  private
+
+  def admin_or_hr?
+    user.admin? || user.hr?
+  end
 
   class Scope < ApplicationPolicy::Scope
-    # NOTE: Be explicit about which records you allow access to!
-    # def resolve
-    #   scope.all
-    # end
+    # define quais registros o usuário pode enxergar em consultas
+    # - admin e RH: acesso a todos os roles
+    # - demais usuários: apenas o próprio role
+    def resolve
+      return scope.all if user.admin? || user.hr?
+
+      scope.where(user_id: user.id)
+    end
   end
 end
