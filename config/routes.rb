@@ -8,6 +8,12 @@ Rails.application.routes.draw do
       post "signup", to: "authentication#signup"
       post "login", to: "authentication#login"
       get "me", to: "authentication#me"
+
+      # Roles
+      resources :roles, only: [ :index ]
+      resources :users, only: [] do
+        resources :role, only: [ :show, :update ]
+      end
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
