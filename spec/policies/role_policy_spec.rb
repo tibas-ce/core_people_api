@@ -3,11 +3,12 @@ require 'rails_helper'
 RSpec.describe RolePolicy, type: :policy do
   subject(:policy) { described_class.new(user, role) }
 
-  let(:role) { create(:role) }
+  let(:other_user) { create(:user) }
+  let(:role) { other_user.role }
 
   describe "#show?" do
     context "quando usuário é admin" do
-      let(:user) { create(:user, role: :admin) }
+      let(:user) { create(:user, :admin) }
 
       it "permite acesso" do
         expect(policy.show?).to be true
@@ -15,7 +16,7 @@ RSpec.describe RolePolicy, type: :policy do
     end
 
     context "quando usuário é RH" do
-      let(:user) { create(:user, role: :hr) }
+      let(:user) { create(:user, :hr) }
 
       it "permite acesso" do
         expect(policy.show?).to be true
@@ -41,7 +42,7 @@ RSpec.describe RolePolicy, type: :policy do
 
   describe "#update?" do
     context "quando usuário é admin" do
-      let(:user) { create(:user, role: :admin) }
+      let(:user) { create(:user, :admin) }
 
       it "permite atualização" do
         expect(policy.update?).to be true
@@ -59,7 +60,7 @@ RSpec.describe RolePolicy, type: :policy do
 
   describe "#index?" do
     context "quando usuário é admin" do
-      let(:user) { create(:user, role: :admin) }
+      let(:user) { create(:user, :admin) }
 
       it "permite listagem" do
         expect(policy.index?).to be true
@@ -67,7 +68,7 @@ RSpec.describe RolePolicy, type: :policy do
     end
 
     context "quando usuário é RH" do
-      let(:user) { create(:user, role: :hr) }
+      let(:user) { create(:user, :hr) }
 
       it "permite listagem" do
         expect(policy.index?).to be true
@@ -88,11 +89,9 @@ RSpec.describe RolePolicy, type: :policy do
       described_class::Scope.new(user, Role.all).resolve
     end
 
-    let!(:own_role) { create(:role, user: user) }
-    let!(:other_role) { create(:role) }
-
     context "quando usuário é admin" do
-      let(:user) { create(:user, role: :admin) }
+      let(:user) { create(:user, :admin) }
+      let!(:other_roles) { create_list(:user, 3).map(&:role) }
 
       it "retorna todos os roles" do
         expect(resolved_scope).to match_array(Role.all)
@@ -100,7 +99,8 @@ RSpec.describe RolePolicy, type: :policy do
     end
 
     context "quando usuário é RH" do
-      let(:user) { create(:user, role: :hr) }
+      let(:user) { create(:user, :hr) }
+      let!(:other_roles) { create_list(:user, 3).map(&:role) }
 
       it "retorna todos os roles" do
         expect(resolved_scope).to match_array(Role.all)
@@ -109,9 +109,10 @@ RSpec.describe RolePolicy, type: :policy do
 
     context "quando usuário comum" do
       let(:user) { create(:user) }
+      let!(:other_roles) { create_list(:user, 3).map(&:role) }
 
       it "retorna apenas o próprio role" do
-        expect(resolved_scope).to contain_exactly(own_role)
+        expect(resolved_scope).to contain_exactly(user.role)
       end
     end
   end
