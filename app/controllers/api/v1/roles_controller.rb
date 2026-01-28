@@ -2,7 +2,8 @@ module Api
   module V1
     class RolesController < ApplicationController
       before_action :authenticate_user!
-      before_action :set_role, only: %i[show update]
+      before_action :set_user, only: [ :show, :update ]
+      before_action :set_role, only: [ :show, :update ]
 
       # GET /api/v1/roles
       def index
@@ -43,12 +44,21 @@ module Api
 
       private
 
-      # O controller busca o registro sem aplicar regra de permissão.
-      # Quem decide se o usuário pode acessar é exclusivamente a policy.
-      def set_role
-        @role = Role.find(params[:id])
+      # Carrega o usuário alvo a partir do user_id da rota.
+      # Retorna 404 caso o usuário não exista.
+      def set_user
+        @user = User.find(params[:user_id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: "Role não encontrado" }, status: :not_found
+        render json: { error: "Usuário não encontrado" }, status: :not_found
+      end
+
+      # O controller apenas carrega o registro.
+      # As regras de acesso e permissão são responsabilidade exclusiva da policy.
+      def set_role
+        @role = @user.role
+        unless @role
+          render json: { error: "Usuário não possui role atribuído" }, status: :not_found
+        end
       end
 
       def role_params
@@ -70,7 +80,7 @@ module Api
       end
 
       # O summary respeita o mesmo escopo autorizado da listagem.
-      # Nunca deve usar Role.count diretamente.
+      # Nunca deve usar Role.count diretamente para evitar vazamento de dados.
       def roles_summary(roles_scope)
         {
           total: roles_scope.count,
