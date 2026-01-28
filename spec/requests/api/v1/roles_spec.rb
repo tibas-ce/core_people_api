@@ -17,7 +17,7 @@ RSpec.describe "Api::V1::Roles", type: :request do
 
   describe "GET /api/v1/users/:user_id/role" do
     it "admin pode ver o role de outro usuário" do
-      get "/api/v1/users/#{target.id}/role",
+      get "/api/v1/users/#{target_user.id}/role",
           headers: auth(admin_token)
 
       json = JSON.parse(response.body)
@@ -37,14 +37,14 @@ RSpec.describe "Api::V1::Roles", type: :request do
     end
 
     it "employee não pode ver role de outro usuário" do
-      get "/api/v1/users/#{target.id}/role",
+      get "/api/v1/users/#{target_user.id}/role",
           headers: auth(employee_token)
 
       expect(response).to have_http_status(:forbidden)
     end
 
     it "retorna unauthorized sem token" do
-      get "/api/v1/users/#{target.id}/role"
+      get "/api/v1/users/#{target_user.id}/role"
 
       expect(response).to have_http_status(:unauthorized)
     end
@@ -52,7 +52,7 @@ RSpec.describe "Api::V1::Roles", type: :request do
 
   describe "PUT /api/v1/users/:user_id/role" do
     it "admin pode alterar o role do usuário" do
-      put "/api/v1/users/#{target.id}/role",
+      put "/api/v1/users/#{target_user.id}/role",
           params: { role: { name: "hr" } },
           headers: auth(admin_token)
 
@@ -60,11 +60,11 @@ RSpec.describe "Api::V1::Roles", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json["role"]["name"]).to eq("hr")
-      expect(target.reload.role.name).to eq("hr")
+      expect(target_user.reload.role.name).to eq("hr")
     end
 
     it "admin recebe erro ao enviar role inválido" do
-      put "/api/v1/users/#{target.id}/role",
+      put "/api/v1/users/#{target_user.id}/role",
           params: { role: { name: "invalid" } },
           headers: auth(admin_token)
 
@@ -72,7 +72,7 @@ RSpec.describe "Api::V1::Roles", type: :request do
     end
 
     it "employee não pode alterar role" do
-      put "/api/v1/users/#{target.id}/role",
+      put "/api/v1/users/#{target_user.id}/role",
           params: { role: { name: "hr" } },
           headers: auth(employee_token)
 
