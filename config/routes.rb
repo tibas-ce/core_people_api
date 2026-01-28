@@ -11,8 +11,9 @@ Rails.application.routes.draw do
 
       # Roles
       resources :roles, only: [ :index ]
+
       resources :users, only: [] do
-        resources :role, only: [ :show, :update ]
+        resource :role, only: [ :show, :update ]
       end
     end
   end
