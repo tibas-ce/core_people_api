@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/tibas-ce/brazilian_docs.git
+  revision: 948c32a5338713aa3ba9c8315a1f22e92ff84073
+  specs:
+    brazilian_docs (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -374,6 +380,7 @@ DEPENDENCIES
   bcrypt (~> 3.1.7)
   bootsnap
   brakeman
+  brazilian_docs!
   bullet
   database_cleaner-active_record
   debug
