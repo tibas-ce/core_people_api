@@ -17,6 +17,9 @@ gem "pundit"
 # Gem de traduções
 gem "rails-i18n"
 
+# Validações de CPFs
+gem "brazilian_docs", git: "https://github.com/tibas-ce/brazilian_docs.git"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
