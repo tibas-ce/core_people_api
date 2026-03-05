@@ -4,9 +4,10 @@ class User < ApplicationRecord
 
   # Associações
   has_one :role, dependent: :destroy
+  has_one :employee_profile, dependent: :destroy
 
   # Callsbacks
-  before_save :normalize_email
+  before_validation :normalize_email
   after_create :assign_default_role
 
   # Validações

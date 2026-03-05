@@ -10,9 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_15_123742) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_05_183154) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "employee_profiles", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "cpf", limit: 11, null: false
+    t.date "birth_date"
+    t.string "phone", limit: 11
+    t.text "address"
+    t.string "position", null: false
+    t.string "department"
+    t.decimal "salary", precision: 10, scale: 2
+    t.date "hire_date", null: false
+    t.date "termination_date"
+    t.string "status", default: "active", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cpf"], name: "index_employee_profiles_on_cpf", unique: true
+    t.index ["status"], name: "index_employee_profiles_on_status"
+    t.index ["user_id"], name: "index_employee_profiles_on_user_id", unique: true
+  end
 
   create_table "roles", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -32,5 +51,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_123742) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "employee_profiles", "users"
   add_foreign_key "roles", "users"
 end
