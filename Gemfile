@@ -14,6 +14,9 @@ gem "bcrypt", "~> 3.1.7"
 gem "jwt"
 gem "pundit"
 
+# Serialização JSON
+gem "blueprinter"
+
 # Gem de traduções
 gem "rails-i18n"
 
