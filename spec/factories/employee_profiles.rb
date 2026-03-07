@@ -22,19 +22,19 @@ FactoryBot.define do
     salary { Faker::Number.between(from: 3000, to: 15000) }
     hire_date { Faker::Date.between(from: 5.years.ago, to: Date.today) }
 
-    status { "active" }
+    status { :active }
 
     # Traits
     trait :inactive do
-      status { "inactive" }
+      status { :inactive }
     end
 
     trait :on_leave do
-      status { "on_leave" }
+      status { :on_leave }
     end
 
     trait :terminated do
-      status { "terminated" }
+      status { :terminated }
       termination_date { Faker::Date.between(from: 1.year.ago, to: Date.today) }
     end
 
