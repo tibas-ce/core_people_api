@@ -17,7 +17,7 @@ class CreateEmployeeProfiles < ActiveRecord::Migration[8.0]
       t.date :termination_date
 
       # Status
-      t.string :status, null: false, default: "active"
+      t.integer :status, default: 0, null: false
 
       t.timestamps
     end
