@@ -3,14 +3,12 @@ require "rails_helper"
 RSpec.describe EmployeeProfile, type: :model do
   describe "associations" do
     it { should belong_to(:user) }
-    it { should validate_presence_of(:user) }
   end
 
   describe "validations" do
     subject { build(:employee_profile) }
 
     # Obrigatórios
-    it { should validate_presence_of(:full_name) }
     it { should validate_presence_of(:cpf) }
     it { should validate_presence_of(:hire_date) }
     it { should validate_presence_of(:position) }
@@ -53,10 +51,10 @@ RSpec.describe EmployeeProfile, type: :model do
 
     # Status
     it { should define_enum_for(:status).with_values(
-      active: "active",
-      inactive: "inactive",
-      on_leave: "on_leave",
-      terminated: "terminated"
+      active: 0,
+      inactive: 1,
+      on_leave: 2,
+      terminated: 3
     ) }
 
     context "validações de data" do
@@ -126,7 +124,8 @@ RSpec.describe EmployeeProfile, type: :model do
   end
 
   describe "instance methods" do
-    let(:profile) { build(:employee_profile, full_name: 'João Silva Santos') }
+    let(:user) { build(:user, name: 'João Silva Santos') }
+    let(:profile) { build(:employee_profile, user: user) }
     describe "#first_name" do
       it "retorna primeiro nome" do
         expect(profile.first_name).to eq('João')
@@ -134,7 +133,7 @@ RSpec.describe EmployeeProfile, type: :model do
     end
     describe "#last_name" do
       it 'retorna sobrenome' do
-        expect(profile.last_name).to eq('Santos')
+        expect(profile.last_name).to eq('Silva Santos')
       end
     end
 

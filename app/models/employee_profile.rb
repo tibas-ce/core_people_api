@@ -4,7 +4,12 @@ class EmployeeProfile < ApplicationRecord
   delegate :name, to: :user
 
   # Enums
-  enum :status, active: "active", inactive: "inactive", on_leave: "on_leave", terminated: "terminated"
+  enum :status, {
+    active: 0,
+    inactive: 1,
+    on_leave: 2,
+    terminated: 3
+  }
 
   # Validações básicas
   validates :hire_date, presence: true
