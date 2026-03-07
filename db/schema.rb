@@ -25,7 +25,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_05_183154) do
     t.decimal "salary", precision: 10, scale: 2
     t.date "hire_date", null: false
     t.date "termination_date"
-    t.string "status", default: "active", null: false
+    t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["cpf"], name: "index_employee_profiles_on_cpf", unique: true
