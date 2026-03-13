@@ -1,8 +1,6 @@
 require "rails_helper"
 
 RSpec.describe EmployeeProfilePolicy do
-  subject { described_class }
-
   let(:admin) { create(:user, :admin) }
   let(:hr_user) { create(:user, :hr) }
   let(:manager) { create(:user, :manager) }
@@ -15,198 +13,200 @@ RSpec.describe EmployeeProfilePolicy do
   let(:employee_profile) { create(:employee_profile, user: employee_user) }
   let(:other_profile) { create(:employee_profile, user: other_user) }
 
-  permissions :index? do
+  def policy(user, record)
+    described_class.new(user, record)
+  end
+
+  describe "#index?" do
     it "concede acesso ao administrador" do
-      expect(subject).to permit(admin, EmployeeProfile)
+      expect(policy(admin, EmployeeProfile).index?).to be true
     end
 
     it "concede acesso ao RH" do
-      expect(subject).to permit(hr_user, EmployeeProfile)
+      expect(policy(hr_user, EmployeeProfile).index?).to be true
     end
 
     it "concede acesso ao gerente" do
-      expect(subject).to permit(manager, EmployeeProfile)
+      expect(policy(manager, EmployeeProfile).index?).to be true
     end
 
     it "nega acesso ao funcionário" do
-      expect(subject).not_to permit(employee_user, EmployeeProfile)
+      expect(policy(employee_user, EmployeeProfile).index?).to be false
     end
   end
 
-  permissions :show? do
+  describe "#show?" do
     context "como administrador" do
       it "pode visualizar qualquer perfil" do
-        expect(subject).to permit(admin, employee_profile)
-        expect(subject).to permit(admin, other_profile)
+        expect(policy(admin, employee_profile).show?).to be true
+        expect(policy(admin, other_profile).show?).to be true
       end
 
       it "pode visualizar o próprio perfil" do
-        expect(subject).to permit(admin, admin_profile)
+        expect(policy(admin, admin_profile).show?).to be true
       end
     end
 
     context "como RH" do
       it "pode visualizar qualquer perfil" do
-        expect(subject).to permit(hr_user, employee_profile)
-        expect(subject).to permit(hr_user, other_profile)
+        expect(policy(hr_user, employee_profile).show?).to be true
+        expect(policy(hr_user, other_profile).show?).to be true
       end
 
       it "pode visualizar o próprio perfil" do
-        expect(subject).to permit(hr_user, hr_profile)
+        expect(policy(hr_user, hr_profile).show?).to be true
       end
     end
 
     context "como gerente" do
       it "pode visualizar o próprio perfil" do
-        expect(subject).to permit(manager, manager_profile)
+        expect(policy(manager, manager_profile).show?).to be true
       end
       # OBS: implementar lógica de equipe depois
     end
 
     context "como funcionário" do
       it "pode visualizar o próprio perfil" do
-        expect(subject).to permit(employee_user, employee_profile)
+        expect(policy(employee_user, employee_profile).show?).to be true
       end
 
-      it "não podem visualizar outros perfis" do
-        expect(subject).not_to permit(employee_user, other_profile)
+      it "não pode visualizar outros perfis" do
+        expect(policy(employee_user, other_profile).show?).to be false
       end
     end
   end
 
-  permissions :create? do
+  describe "#create?" do
     it "concede acesso ao administrador" do
-      expect(subject).to permit(admin, EmployeeProfile)
+      expect(policy(admin, EmployeeProfile).create?).to be true
     end
 
     it "concede acesso ao RH" do
-      expect(subject).to permit(hr_user, EmployeeProfile)
+      expect(policy(hr_user, EmployeeProfile).create?).to be true
     end
 
     it "nega acesso ao gerente" do
-      expect(subject).not_to permit(manager, EmployeeProfile)
+      expect(policy(manager, EmployeeProfile).create?).to be false
     end
 
     it "nega acesso ao funcionário" do
-      expect(subject).not_to permit(employee_user, EmployeeProfile)
+      expect(policy(employee_user, EmployeeProfile).create?).to be false
     end
   end
 
-  permissions :update? do
+  describe "#update?" do
     context "como administrador" do
       it "pode atualizar qualquer perfil" do
-        expect(subject).to permit(admin, employee_profile)
-        expect(subject).to permit(admin, other_profile)
+        expect(policy(admin, employee_profile).update?).to be true
+        expect(policy(admin, other_profile).update?).to be true
       end
     end
 
     context "como RH" do
       it "pode atualizar qualquer perfil" do
-        expect(subject).to permit(hr_user, employee_profile)
-        expect(subject).to permit(hr_user, other_profile)
+        expect(policy(hr_user, employee_profile).update?).to be true
+        expect(policy(hr_user, other_profile).update?).to be true
       end
     end
 
     context "como gerente" do
       it "pode atualizar o próprio perfil" do
-        expect(subject).to permit(manager, manager_profile)
+        expect(policy(manager, manager_profile).update?).to be true
       end
 
-      it "não podem atualizar outros perfis" do
-        expect(subject).not_to permit(manager, employee_profile)
+      it "não pode atualizar outros perfis" do
+        expect(policy(manager, employee_profile).update?).to be false
       end
     end
 
     context "como funcionário" do
       it "pode atualizar o próprio perfil" do
-        expect(subject).to permit(employee_user, employee_profile)
+        expect(policy(employee_user, employee_profile).update?).to be true
       end
 
-      it "não podem atualizar outros perfis" do
-        expect(subject).not_to permit(employee_user, other_profile)
+      it "não pode atualizar outros perfis" do
+        expect(policy(employee_user, other_profile).update?).to be false
       end
     end
   end
 
-  permissions :destroy? do
+  describe "#destroy?" do
     it "concede acesso ao administrador" do
-      expect(subject).to permit(admin, employee_profile)
+      expect(policy(admin, employee_profile).destroy?).to be true
     end
 
     it "concede acesso ao RH" do
-      expect(subject).to permit(hr_user, employee_profile)
+      expect(policy(hr_user, employee_profile).destroy?).to be true
     end
 
     it "nega acesso ao gerente" do
-      expect(subject).not_to permit(manager, employee_profile)
+      expect(policy(manager, employee_profile).destroy?).to be false
     end
 
     it "nega acesso ao funcionário" do
-      expect(subject).not_to permit(employee_user, employee_profile)
+      expect(policy(employee_user, employee_profile).destroy?).to be false
     end
   end
 
-  # Controle de acesso a dados sensíveis (ex: salário, CPF). Usado para decidir se a view admin do blueprint pode ser utilizada.
-  permissions :show_sensitive_data? do
+  describe "#show_sensitive_data?" do
     it "concede acesso ao administrador" do
-      expect(subject).to permit(admin, employee_profile)
+      expect(policy(admin, employee_profile).show_sensitive_data?).to be true
     end
 
     it "concede acesso ao RH" do
-      expect(subject).to permit(hr_user, employee_profile)
+      expect(policy(hr_user, employee_profile).show_sensitive_data?).to be true
     end
 
     it "concede acesso ao gerente para visualizar o próprio perfil" do
-      expect(subject).to permit(manager, manager_profile)
+      expect(policy(manager, manager_profile).show_sensitive_data?).to be true
     end
 
-    it "nega acesso ao gerente que está visualizando os outros" do
-      expect(subject).not_to permit(manager, employee_profile)
+    it "nega acesso ao gerente visualizando outros perfis" do
+      expect(policy(manager, employee_profile).show_sensitive_data?).to be false
     end
 
     it "concede acesso ao funcionário para visualizar o próprio perfil" do
-      expect(subject).to permit(employee_user, employee_profile)
+      expect(policy(employee_user, employee_profile).show_sensitive_data?).to be true
     end
 
-    it "nega acesso ao funcionário que está visualizando os outros" do
-      expect(subject).not_to permit(employee_user, other_profile)
+    it "nega acesso ao funcionário visualizando outros perfis" do
+      expect(policy(employee_user, other_profile).show_sensitive_data?).to be false
     end
   end
 
-  # Scope define quais registros são visíveis no index dependendo do papel do usuário.
   describe "Scope" do
     let!(:profiles) { create_list(:employee_profile, 5) }
 
+    def resolve_scope(user)
+      described_class::Scope.new(user, EmployeeProfile.all).resolve
+    end
+
     context "como administrador" do
       it "retorna todos os perfis" do
-        scope = Pundit.policy_scope(admin, EmployeeProfile)
-        expect(scope.count).to eq(5)
+        expect(resolve_scope(admin).count).to eq(5)
       end
     end
 
     context "como RH" do
       it "retorna todos os perfis" do
-        scope = Pundit.policy_scope(hr_user, EmployeeProfile)
-        expect(scope.count).to eq(5)
+        expect(resolve_scope(hr_user).count).to eq(5)
       end
     end
 
     context "como gerente" do
-      it "retorna o próprio perfil" do
+      it "retorna apenas o próprio perfil" do
         create(:employee_profile, user: manager)
-        scope = Pundit.policy_scope(manager, EmployeeProfile)
-        expect(scope.count).to eq(1)
-        expect(scope.first.user_id).to eq(manager.id)
+        expect(resolve_scope(manager).count).to eq(1)
+        expect(resolve_scope(manager).first.user_id).to eq(manager.id)
       end
-      # OBS: + team members quando implementar equipe
+      # OBS: + membros da equipe quando implementar departamentos
     end
 
     context "como funcionário" do
-      it "retorna o próprio perfil" do
+      it "retorna apenas o próprio perfil" do
         create(:employee_profile, user: employee_user)
-        scope = Pundit.policy_scope(employee_user, EmployeeProfile)
-        expect(scope.count).to eq(1)
-        expect(scope.first.user_id).to eq(employee_user.id)
+        expect(resolve_scope(employee_user).count).to eq(1)
+        expect(resolve_scope(employee_user).first.user_id).to eq(employee_user.id)
       end
     end
   end
