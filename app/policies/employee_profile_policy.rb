@@ -33,7 +33,7 @@ class EmployeeProfilePolicy < ApplicationPolicy
     user.admin? || user.hr? || own_profile?
   end
 
-  class Scope < Scope
+  class Scope < ApplicationPolicy::Scope
     def resolve
       if user.admin? || user.hr?
         # admin e hr veem todos
