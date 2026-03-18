@@ -8,6 +8,9 @@ class ApplicationController < ActionController::API
   # Quando o Pundit levantar um erro de permissão, chamamos o método user_not_authorized
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
+  # Intercepta exceções de registro não encontrado e retorna erro 404 padronizado
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
+
   private
 
   # Resposta padrão quando o usuário não tem permissão para acessar algo
