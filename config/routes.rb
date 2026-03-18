@@ -15,6 +15,13 @@ Rails.application.routes.draw do
       resources :users, only: [] do
         resource :role, only: [ :show, :update ]
       end
+
+      # Employee
+      resources :employees do
+        collection do
+          get "me"
+        end
+      end
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
