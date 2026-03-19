@@ -23,7 +23,7 @@ RSpec.describe "API::V1::Employees", type: :request do
         expect(response).to have_http_status(:ok)
         expect(json["employees"]).to be_an(Array)
         expect(json["employees"].length).to eq(5)
-        expect(json["employees"].first).to have_key("name")
+        expect(json["employees"].first).to have_key("position")
         expect(json["employees"].first).not_to have_key("salary")
       end
     end
@@ -39,6 +39,7 @@ RSpec.describe "API::V1::Employees", type: :request do
 
     context "como gerente" do
       it "retorna apenas o próprio perfil" do
+        create(:employee_profile, user: manager)
         get "/api/v1/employees",
             headers: { "Authorization": "Bearer #{manager_token}" }
         json = JSON.parse(response.body)
