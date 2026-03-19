@@ -13,7 +13,7 @@ module Api
         @employees = policy_scope(EmployeeProfile).includes(:user)
 
         render json: {
-          employees: EmployeeProfileBlueprint.render(@employees, view: :minimal)
+          employees: EmployeeProfileBlueprint.render_as_hash(@employees, view: :minimal)
         }
       end
 
@@ -163,7 +163,7 @@ module Api
       # Método helper para padronizar resposta de um funcionário
       def render_employee(employee, view:, message: nil, status: :ok)
         response = {
-          employee: EmployeeProfileBlueprint.render(employee, view: view)
+          employee: EmployeeProfileBlueprint.render_as_json(employee, view: view)
         }
 
         # Adiciona mensagem opcional
