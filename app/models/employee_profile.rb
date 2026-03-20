@@ -1,4 +1,7 @@
 class EmployeeProfile < ApplicationRecord
+  # Includes
+  include Filterable
+
   # Associações
   belongs_to :user
   delegate :name, to: :user
