@@ -3,8 +3,11 @@ module Filterable
 
   class_methods do
     # Realiza busca por nome (associado ao User) ou CPF (EmployeeProfile)
-    # - Usa LEFT JOIN para acessar users.name
+    # - Preserva o escopo atual (evita que joins afetem filtros anteriores)
+    # - Usa subquery de IDs para manter isolamento do scope original
+    # - Utiliza unscoped + left join para garantir acesso a users.name sem perder registros
     # - Suporta CPF com ou sem máscara
+    # - Se a query não contiver dígitos, busca apenas por nome
     # - Retorna todos os registros se a query estiver vazia
     def search(query)
       return all if query.blank?
@@ -12,11 +15,17 @@ module Filterable
       # Remove máscara do CPF para buscar
       clean_query = query.gsub(/\D/, "")
 
-      left_joins(:user).where(
+      scoped_ids = all.select(:id)
+
+      scope = unscoped
+        .left_joins(:user)
+        .where(employee_profiles: { id: scoped_ids })
+
+      clean_query.present? ? scope.where(
         "users.name ILIKE :term OR employee_profiles.cpf LIKE :cpf",
         term: "%#{query}%",
         cpf: "%#{clean_query}%"
-      )
+      ) : scope.where("users.name ILIKE :term", term: "%#{query}%")
     end
 
     # Filtra registros pelo status (ex: active, inactive)
