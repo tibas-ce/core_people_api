@@ -2,6 +2,9 @@ require "rails_helper"
 
 RSpec.describe "API::V1::Employees", type: :request do
   describe "GET /api/v1/employees com filtros" do
+    let(:admin) { create(:user, :admin) }
+    let(:admin_token) { JsonWebToken.encode(user_id: admin.id) }
+
     let!(:dev1) { create(:employee_profile, user: create(:user, name: "Carlos Silva"), position: "Desenvolvedor", department: "TI", status: :active) }
     let!(:dev2) { create(:employee_profile, user: create(:user, name: "Ana Santos"), position: "Desenvolvedora", department: "TI", status: :active) }
     let!(:designer) { create(:employee_profile, user: create(:user, name: "Bruno Costa"), position: "Designer", department: "Marketing", status: :active) }
