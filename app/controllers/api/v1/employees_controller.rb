@@ -22,7 +22,7 @@ module Api
         total = @employees.count
 
         render json: {
-          employees: EmployeeProfileBlueprint.render_as_hash(@employees, view: :minimal),
+          employees: serialize_employees(@employees),
           meta: {
             total: total,
             filtered: filters_appleid?
@@ -192,11 +192,11 @@ module Api
           scope = scope.filter_by_status(params[:status])
         end
 
-        if params[:department].present?
+        if params[:department].present? && EmployeeProfile.where("LOWER(department) = ?", params[:department].downcase).exists?
           scope = scope.filter_by_department(params[:department])
         end
 
-        if params[:position].present?
+        if params[:position].present? && EmployeeProfile.where("LOWER(position) = ?", params[:position].downcase).exists?
           scope = scope.filter_by_position(params[:position])
         end
 
@@ -205,24 +205,34 @@ module Api
 
       def apply_sorting(scope)
         return scope.order(created_at: :desc) unless params[:sort].present?
+
         column, direction = params[:sort].split(":")
-        allowed_columns = {
-          "name" => "users.name"
-        }
 
-        allowed_directions = %w[asc desc]
-
-        return scope.order(created_at: :desc) unless allowed_columns.key?(column)
-        return scope.order(created_at: :desc) unless allowed_directions.include?(direction)
-
-        scope.joins(:user).order("#{allowed_columns[column]} #{direction}")
+        scope.sort_by_column(column, direction)
       end
 
       def filters_appleid?
-        params[:search].present? ||
-        params[:status].present? ||
-        params[:department].present? ||
-        params[:position].present?
+        return true if params[:search].present?
+
+        return true if params[:status].present? && EmployeeProfile.statuses.key?(params[:status])
+
+        return true if params[:department].present? && EmployeeProfile.where(department: params[:department]).exists?
+
+        return true if params[:position].present? && EmployeeProfile.where(position: params[:position]).exists?
+
+        false
+      end
+
+      def serialize_employees(employees)
+        EmployeeProfileBlueprint.render_as_hash(employees, view: :minimal).map do |emp|
+          employee_record = employees.find { |e| e.id == emp[:id] }
+
+          emp.merge(
+            user: {
+              name: employee_record.user&.name
+            }
+          )
+        end
       end
     end
   end
