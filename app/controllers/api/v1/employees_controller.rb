@@ -12,8 +12,21 @@ module Api
         # Includes evita N+1 queries ao carregar o user associado
         @employees = policy_scope(EmployeeProfile).includes(:user)
 
+        # Aplicar filtros e buscas
+        @employees = apply_filters(@employees)
+
+        # Aplicar ordenação
+        @employees = apply_sorting(@employees)
+
+        # Contar total antes de paginar (se adicionar paginação depois)
+        total = @employees.count
+
         render json: {
-          employees: EmployeeProfileBlueprint.render_as_hash(@employees, view: :minimal)
+          employees: EmployeeProfileBlueprint.render_as_hash(@employees, view: :minimal),
+          meta: {
+            total: total,
+            filtered: filters_appleid?
+          }
         }
       end
 
@@ -170,6 +183,46 @@ module Api
         response[:message] = message if message
 
         render json: response, status: status
+      end
+
+      def apply_filters(scope)
+        scope = scope.search(params[:search]) if params[:search].present?
+
+        if params[:status].present? && EmployeeProfile.statuses.key?(params[:status])
+          scope = scope.filter_by_status(params[:status])
+        end
+
+        if params[:department].present?
+          scope = scope.filter_by_department(params[:department])
+        end
+
+        if params[:position].present?
+          scope = scope.filter_by_position(params[:position])
+        end
+
+        scope
+      end
+
+      def apply_sorting(scope)
+        return scope.order(created_at: :desc) unless params[:sort].present?
+        column, direction = params[:sort].split(":")
+        allowed_columns = {
+          "name" => "users.name"
+        }
+
+        allowed_directions = %w[asc desc]
+
+        return scope.order(created_at: :desc) unless allowed_columns.key?(column)
+        return scope.order(created_at: :desc) unless allowed_directions.include?(direction)
+
+        scope.joins(:user).order("#{allowed_columns[column]} #{direction}")
+      end
+
+      def filters_appleid?
+        params[:search].present? ||
+        params[:status].present? ||
+        params[:department].present? ||
+        params[:position].present?
       end
     end
   end
