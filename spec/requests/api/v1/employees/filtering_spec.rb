@@ -178,8 +178,9 @@ RSpec.describe "API::V1::Employees", type: :request do
             headers: { "Authorization": "Bearer #{admin_token}" }
         json = JSON.parse(response.body)
 
+        names = json["employees"].map { |e| e["user"]["name"] }
         expect(json["employees"].length).to eq(2)
-        expect(json["employees"].first["user"]["name"]).to eq("Carlos Silva")
+        expect(names).to eq([ "Ana Santos", "Carlos Silva" ])
       end
     end
 
