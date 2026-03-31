@@ -37,7 +37,14 @@ begin
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
+
+# Auto-require de arquivos de suporte (helpers, matchers, shared contexts) usados nos testes
+Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+
 RSpec.configure do |config|
+  # Disponibiliza métodos do RequesteHelper apenas para request specs, mantendo o escopo organizado e evitando poluição global
+  config.include RequestHelper, type: :request
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
