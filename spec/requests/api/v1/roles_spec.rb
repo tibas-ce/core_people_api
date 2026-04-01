@@ -1,44 +1,29 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Roles", type: :request do
-  def auth(token)
-    { "Authorization" => "Bearer #{token}" }
-  end
   let(:admin) { create(:user, :admin) }
-  let(:hr_user) { create(:user, :hr) }
+  let(:hr) { create(:user, :hr) }
   let(:manager) { create(:user, :manager) }
   let(:employee) { create(:user) }
   let(:target_user) { create(:user) }
 
-  let(:admin_token) { JsonWebToken.encode(user_id: admin.id) }
-  let(:hr_token) { JsonWebToken.encode(user_id: hr_user.id) }
-  let(:manager_token) { JsonWebToken.encode(user_id: manager.id) }
-  let(:employee_token) { JsonWebToken.encode(user_id: employee.id) }
-
   describe "GET /api/v1/users/:user_id/role" do
     it "admin pode ver o role de outro usuário" do
-      get "/api/v1/users/#{target_user.id}/role",
-          headers: auth(admin_token)
-
-      json = JSON.parse(response.body)
+      get_auth "/api/v1/users/#{target_user.id}/role", user: admin
 
       expect(response).to have_http_status(:ok)
       expect(json["role"]["name"]).to eq("employee")
     end
 
     it "employee pode ver o próprio role" do
-      get "/api/v1/users/#{employee.id}/role",
-          headers: auth(employee_token)
-
-      json = JSON.parse(response.body)
+      get_auth "/api/v1/users/#{employee.id}/role", user: employee
 
       expect(response).to have_http_status(:ok)
       expect(json["role"]["name"]).to eq("employee")
     end
 
     it "employee não pode ver role de outro usuário" do
-      get "/api/v1/users/#{target_user.id}/role",
-          headers: auth(employee_token)
+      get_auth "/api/v1/users/#{target_user.id}/role", user: employee
 
       expect(response).to have_http_status(:forbidden)
     end
@@ -52,11 +37,9 @@ RSpec.describe "Api::V1::Roles", type: :request do
 
   describe "PUT /api/v1/users/:user_id/role" do
     it "admin pode alterar o role do usuário" do
-      put "/api/v1/users/#{target_user.id}/role",
-          params: { role: { name: "hr" } },
-          headers: auth(admin_token)
-
-      json = JSON.parse(response.body)
+      put_auth "/api/v1/users/#{target_user.id}/role",
+          user: admin,
+          params: { role: { name: "hr" } }
 
       expect(response).to have_http_status(:ok)
       expect(json["role"]["name"]).to eq("hr")
@@ -64,17 +47,17 @@ RSpec.describe "Api::V1::Roles", type: :request do
     end
 
     it "admin recebe erro ao enviar role inválido" do
-      put "/api/v1/users/#{target_user.id}/role",
-          params: { role: { name: "invalid" } },
-          headers: auth(admin_token)
+      put_auth "/api/v1/users/#{target_user.id}/role",
+          user: admin,
+          params: { role: { name: "invalid" } }
 
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "employee não pode alterar role" do
-      put "/api/v1/users/#{target_user.id}/role",
-          params: { role: { name: "hr" } },
-          headers: auth(employee_token)
+      put_auth "/api/v1/users/#{target_user.id}/role",
+          user: employee,
+          params: { role: { name: "hr" } }
 
       expect(response).to have_http_status(:forbidden)
     end
@@ -89,9 +72,7 @@ RSpec.describe "Api::V1::Roles", type: :request do
     end
 
     it "admin vê lista de roles" do
-      get "/api/v1/roles", headers: auth(admin_token)
-
-      json = JSON.parse(response.body)
+      get_auth "/api/v1/roles", user: admin
 
       expect(response).to have_http_status(:ok)
       expect(json["roles"]).to be_an(Array)
@@ -99,7 +80,7 @@ RSpec.describe "Api::V1::Roles", type: :request do
     end
 
     it "employee não pode listar roles" do
-      get "/api/v1/roles", headers: auth(employee_token)
+      get_auth "/api/v1/roles", user: employee
 
       expect(response).to have_http_status(:forbidden)
     end
