@@ -1,0 +1,19 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: tiberio
+  password: "flora2017"
+  pool: 5
+
+development:
+  <<: *default
+  database: core_people_api_development
+
+test:
+  <<: *default
+  database: core_people_api_test
+
+production:
+  <<: *default
+  database: core_people_api_production
