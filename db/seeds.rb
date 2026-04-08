@@ -1,6 +1,6 @@
 # Segurança básica
-if Rails.env.production?
-  puts "Seeds não devem rodar em produção!"
+if Rails.env.production? && ENV["ALLOW_SEED"] != "true"
+  puts "Seeds bloqueados em produção!"
   exit
 end
 
