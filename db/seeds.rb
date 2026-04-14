@@ -54,7 +54,7 @@ if [ "demo", "default" ].include?(seed_mode)
     profile_attrs: {
       position: "CEO",
       department: "Diretoria",
-      cpf: "34138247033",
+      cpf: "19662145030",
       hire_date: Date.parse("2020-01-01")
     }
   )
@@ -68,7 +68,7 @@ if [ "demo", "default" ].include?(seed_mode)
     profile_attrs: {
       position: "Gerente de RH",
       department: "RH",
-      cpf: "84651633081"
+      cpf: "45037148011"
     }
   )
 
@@ -81,7 +81,7 @@ if [ "demo", "default" ].include?(seed_mode)
     profile_attrs: {
       position: "Dev Junior",
       department: "TI",
-      cpf: "08035449050"
+      cpf: "04390310022"
     }
   )
 end
