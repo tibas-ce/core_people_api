@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-rails db:migrate
+bin/rails db:migrate
 
 if [ "$RUN_SEED" = "true" ]; then
     echo "Rodando seed..."
-    ALLOW_SEED=true SEED_MODE=demo rails db:seed
+    ALLOW_SEED=true SEED_MODE=demo bin/rails db:seed
 else
     echo "Seed ignorado"
 fi
