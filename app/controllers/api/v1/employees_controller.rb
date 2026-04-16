@@ -9,23 +9,16 @@ module Api
         authorize EmployeeProfile
 
         # Aplica policy_scope (Pundit) para filtrar registros conforme o papel do usuário
-        # Includes evita N+1 queries ao carregar o user associado
-        @employees = policy_scope(EmployeeProfile).includes(:user)
+        @employees = policy_scope(EmployeeProfile)
 
-        # Aplicar filtros e buscas
-        @employees = apply_filters(@employees)
-
-        # Aplicar ordenação
-        @employees = apply_sorting(@employees)
-
-        # Contar total antes de paginar (se adicionar paginação depois)
-        total = @employees.count
+        # Aplicar filtros, buscas e sorting via query
+        @employees = EmployeeProfilesQuery.new(@employees, params).call
 
         render json: {
-          employees: serialize_employees(@employees),
+          employees: EmployeeProfileBlueprint.render_as_json(@employees, view: :minimal),
           meta: {
-            total: total,
-            filtered: filters_appleid?
+            total: @employees.count,
+            filtered: filters_applied?
           }
         }
       end
@@ -185,33 +178,7 @@ module Api
         render json: response, status: status
       end
 
-      def apply_filters(scope)
-        scope = scope.search(params[:search]) if params[:search].present?
-
-        if params[:status].present? && EmployeeProfile.statuses.key?(params[:status])
-          scope = scope.filter_by_status(params[:status])
-        end
-
-        if params[:department].present? && EmployeeProfile.where("LOWER(department) = ?", params[:department].downcase).exists?
-          scope = scope.filter_by_department(params[:department])
-        end
-
-        if params[:position].present? && EmployeeProfile.where("LOWER(position) = ?", params[:position].downcase).exists?
-          scope = scope.filter_by_position(params[:position])
-        end
-
-        scope
-      end
-
-      def apply_sorting(scope)
-        return scope.order(created_at: :desc) unless params[:sort].present?
-
-        column, direction = params[:sort].split(":")
-
-        scope.sort_by_column(column, direction)
-      end
-
-      def filters_appleid?
+      def filters_applied?
         return true if params[:search].present?
 
         return true if params[:status].present? && EmployeeProfile.statuses.key?(params[:status])
@@ -221,18 +188,6 @@ module Api
         return true if params[:position].present? && EmployeeProfile.where(position: params[:position]).exists?
 
         false
-      end
-
-      def serialize_employees(employees)
-        EmployeeProfileBlueprint.render_as_hash(employees, view: :minimal).map do |emp|
-          employee_record = employees.find { |e| e.id == emp[:id] }
-
-          emp.merge(
-            user: {
-              name: employee_record.user&.name
-            }
-          )
-        end
       end
     end
   end
