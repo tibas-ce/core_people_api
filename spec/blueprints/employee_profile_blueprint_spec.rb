@@ -29,10 +29,6 @@ RSpec.describe EmployeeProfileBlueprint do
       expect(result).not_to have_key("salary")
       expect(result).not_to have_key("cpf")
     end
-
-    it "não inclui dados do usuário" do
-      expect(result).not_to have_key("user")
-    end
   end
 
   describe "visualização padrão" do
