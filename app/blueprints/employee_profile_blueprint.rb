@@ -4,6 +4,11 @@ class EmployeeProfileBlueprint < Blueprinter::Base
   # View usada para listagens (index). Expõe apenas dados básicos para reduzir payload e evitar exposição de informações sensíveis.
   view :minimal do
     fields :position, :department, :status
+
+    # Como na view minimal para o uso de filtros e necessário o atributo name de user. Em vez de associar, criamos um bloco personalizado
+    field :user do |employee, _options|
+      { name: employee.user&.name }
+    end
   end
 
   # View: detail (detalhes padrão)
