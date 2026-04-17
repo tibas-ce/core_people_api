@@ -1,311 +1,154 @@
-> ⚠️ **Projeto de Estudos**
-> Este projeto tem foco educacional e de portfólio, priorizando clareza de regras de negócio, organização de código e boas práticas de teste.
-
 <div align="center">
 
-# CORE PEOPLE API
+# **Core People API — HR Management System**
+
+API RESTful para gestão de recursos humanos com autenticação JWT, controle de acesso por roles (RBAC) e cobertura de testes robusta.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Ruby-3.4+-red?logo=ruby" />
+  <img src="https://img.shields.io/badge/Rails-8.0+-red?logo=rubyonrails" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Database-blue?logo=postgresql" />
+  
+  <img src="https://img.shields.io/badge/Auth-JWT-orange" />
+  <img src="https://img.shields.io/badge/Authorization-Pundit-purple" />
+
+  <img src="https://img.shields.io/badge/Tested%20with-RSpec-green" />
+  <img src="https://img.shields.io/badge/Coverage-93%25-brightgreen" />
+
+  [![Live API](https://img.shields.io/badge/API-Online-success)](https://corepeopleapi-production.up.railway.app/api/v1/health)
+
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey" />
+</p>
+
+**Produção:** [Core People API](https://corepeopleapi-production.up.railway.app/api/v1/health)
 
 </div>
 
-![Coverage](https://img.shields.io/badge/coverage-95.7%25-brightgreen)
-![Rails](https://img.shields.io/badge/rails-8.0.4-red)
-![Ruby](https://img.shields.io/badge/ruby-3.4.5-red)
-
 ---
 
-# 🏢 Core People API - HR Management System
+## Sobre o Projeto
 
-API RESTful para gerenciamento de recursos humanos, desenvolvida com Ruby on Rails em modo API, com foco em regras de negócio, organização e testabilidade.
+Este projeto simula um sistema real de RH, com autenticação, autorização por papéis e operações completas sobre funcionários.
 
----
+Mais do que funcionalidades, o foco em organização, testabilidade e boas práticas de software.
 
-## 🚀 Tecnologias Utilizadas
+## Destaques Técnicos
 
-* Ruby 3.4.5+
-* Rails 8.0.4+ (API mode)
-* PostgreSQL
-* JWT (autenticação)
-* Pundit (autorização)
-* Blueprinter (serialização JSON)
-* RSpec (testes)
-* FactoryBot
-* SimpleCov (cobertura de testes)
-* brazilian_docs (validação de CPF - gem própria)
+- ✅ Arquitetura orientada a **responsabilidade única**
+- ✅ Uso de **TDD** com cobertura consistente
+- ✅ API padronizada com contratos JSON bem definidos
+- ✅ Controle de acesso por **roles (RBAC)**
+- ✅ Otimização de queries (evitando N+1)
+- ✅ Deploy real em ambiente cloud (Railway)
 
----
+## Decisões de Arquitetura
 
-## 📦 Pré-requisitos
+### 🔹 Query Objects
+Encapsulamento da lógica de busca em `EmployeeProfilesQuery`, evitando models inchados e facilitando testes isolados.
 
-* Ruby 3.4.5 ou superior
-* PostgreSQL 12+
-* Bundler
+### 🔹 Autorização com Pundit
+Separação clara entre regras de negócio e controle de acesso, permitindo escalabilidade e manutenção simples.
 
----
+### 🔹 Serialização com Blueprinter
+Controle explícito da exposição de dados, evitando vazamento de informações sensíveis e mantendo performance.
 
-## 🔧 Instalação
+### 🔹 Otimização de Queries
+Uso de `eager_load` para eliminar problemas de N+1 queries.
 
-```bash
-git clone https://github.com/tibas-ce/core_people_api.git
-cd core_people_api
-bundle install
-cp .env.example .env
+## Desafios e Soluções
+
+### 🔸 Filtros dinâmicos combináveis
+Implementação de múltiplos filtros (`search`, `status`, `department`, `sort`) sem acoplamento ou fragilidade.
+
+### 🔸 Ordenação entre tabelas
+Ordenação por atributos de tabelas relacionadas (ex: nome do usuário), resolvida com joins explícitos e controle de ambiguidade no PostgreSQL.
+
+### 🔸 Deploy real
+Configuração completa de ambiente com:
+- variáveis seguras
+- migrations automáticas
+- pipeline funcional
+
+## Stack Tecnológica
+
+- **Ruby 3.4+ / Rails 8 (API mode)**
+- **PostgreSQL**
+- **JWT** (autenticação stateless)
+- **Pundit** (autorização)
+- **Blueprinter** (serialização)
+- **RSpec** + **SimpleCov** (testes)
+
+## Filtros Disponíveis (Employees)
+
+A API suporta filtros dinâmicos via Query Params:
+
+  * `search`: Busca textual por **Nome** ou **CPF**.
+  * `status`: Filtra por `active` ou `inactive`.
+  * `department` & `position`: Filtros por departamento ou cargo (case-insensitive).
+  * `sort`: Ordenação dinâmica no formato `coluna:direção` (ex: `name:asc`, `created_at:desc`).
+
+### Exemplo de uso:
+```
+GET /employees?search=joao&status=active&sort=name:asc
 ```
 
-Configure o `.env`:
+## Suíte de Testes (TDD)
 
-```env
-DATABASE_USERNAME=seu_usuario
-DATABASE_PASSWORD=sua_senha
-DATABASE_HOST=localhost
-JWT_SECRET_KEY=sua_chave_secreta
-```
-
-Gerar chave JWT:
-
-```bash
-rails secret
-```
-
-Banco de dados:
-
-```bash
-rails db:create
-rails db:migrate
-rails db:seed
-```
-
----
-
-## 🏃 Executando
-
-```bash
-rails server
-```
-
-## 🌐 Base URL
-
-http://localhost:3000/api/v1
-
----
-
-## 🧪 Testes
+O projeto segue abordagem **Test-Driven Development**, garantindo confiabilidade e evolução segura.
 
 ```bash
 bundle exec rspec
 ```
 
-- 234 exemplos
+  * **Request Specs**: Validação rigorosa dos contratos JSON e status HTTP.
+  * **Policy Specs**: Testes unitários para garantir que cada Role acesse apenas o que lhe é permitido.
+
+## Instalação Local
+
+```bash
+git clone https://github.com/tibas-ce/core_people_api.git
+cd core_people_api
+bundle install
+cp .env.example .env # Configure suas credenciais
+rails db:create db:migrate db:seed
+rails server
+```
+
+## Documentação de Rotas
+
+Para facilitar o teste da API, incluí coleção pronta para importação:
+
+  * [Insomnia Export](./docs/insomnia_export.json)
+
+## Caso de uso
+
+Imagine um sistema de RH onde:
+
+- Administradores gerenciam funcionários
+- Managers visualizam suas equipes
+- Funcionários acessam seus próprios dados
+
+A API foi projetada para suportar esse cenário com segurança e escalabilidade.
+
+## Qualidade e cobertura
+
+- 239 testes automatizados
 - 0 falhas
-- Cobertura: ~95.7% (SimpleCov)
+- 93%+ de cobertura de código
+- Testes de:
+  - Models
+  - Policies (autorização)
+  - Requests (API)
+  - Services
+  - Queries
 
-O projeto segue uma abordagem baseada em TDD,
-com testes cobrindo:
+Foco em TDD desde o início do projeto.
 
-- models (validações e regras de domínio)
-- policies (autorização)
-- requests (contrato da API)
-- services (JWT)
-- serializers (blueprints)
-- concerns (filtros e autenticação)
+## Autor
 
----
+**Tibério dos Santos Ferreira**
 
-## 🔐 Autenticação
+  * **GitHub:** [@tibas-ce](https://github.com/tibas-ce)
+  * **LinkedIn:** [@Tibério Dos Santos Ferreira](https://www.linkedin.com/in/tiberio-ferreira/)
 
-A API utiliza JWT (JSON Web Tokens) para autenticação stateless.
-
-Header:
-
-```
-Authorization: Bearer {token}
-```
-
-Tokens expiram em 24h.
-
----
-
-## 📚 Endpoints Principais
-
-### Auth
-
-* `POST /signup`
-* `POST /login`
-* `GET /me`
-
----
-
-### Roles
-
-* `GET /roles`
-* `GET /users/:user_id/role`
-* `PUT /users/:user_id/role`
-
----
-
-### Employees
-
-* `GET /employees`
-* `GET /employees/:id`
-* `GET /employees/me`
-* `POST /employees`
-* `PUT /employees/:id`
-* `DELETE /employees/:id`
-
----
-
-## 🔎 Filtros disponíveis (Employees)
-
-* `search` (nome ou CPF)
-* `status`
-* `department`
-* `position`
-* `sort`
-
----
-
-## 🔐 Sistema de Roles
-
-| Role     | Descrição       |
-| -------- | --------------- |
-| admin    | Acesso total    |
-| hr       | Gestão de RH    |
-| manager  | Acesso limitado |
-| employee | Acesso próprio  |
-
----
-
-## 📊 Matriz de Permissões
-
-| Ação                         | admin |  hr | manager | employee |
-| ---------------------------- | :---: | :-: | :-----: | :------: |
-| Listar funcionários          |   ✅   |  ✅  |    ✅    |     ❌    |
-| Ver qualquer perfil          |   ✅   |  ✅  |    ❌    |     ❌    |
-| Ver próprio perfil           |   ✅   |  ✅  |    ✅    |     ✅    |
-| Criar funcionário            |   ✅   |  ✅  |    ❌    |     ❌    |
-| Atualizar qualquer campo     |   ✅   |  ✅  |    ❌    |     ❌    |
-| Atualizar próprio (limitado) |   ✅   |  ✅  |    ✅    |     ✅    |
-| Desativar funcionário        |   ✅   |  ✅  |    ❌    |     ❌    |
-
----
-
-## 🔄 Exemplo de Fluxo
-
-1. Usuário cria conta (`signup`)
-2. Recebe role padrão `employee`
-3. HR cria perfil de funcionário
-4. Admin pode alterar roles
-5. Usuários acessam dados conforme permissões
-
----
-
-## 📁 Estrutura
-
-```text
-app/
-├── controllers/
-├── models/
-├── policies/
-├── services/
-├── blueprints/
-
-spec/
-├── models/
-├── requests/
-├── policies/
-├── services/
-```
-
----
-
-## 🧠 Decisões de Arquitetura
-
-- **User sempre possui um Role**
-  → evita estados inválidos e simplifica autorização
-
-- **Autorização via Pundit**
-  → regras centralizadas e testáveis
-
-- **Serialização com Blueprinter**
-  → controle explícito de exposição de dados
-
-- **Filtros isolados em concern**
-  → reutilização e testabilidade
-
-- **Soft delete para employees**
-  → preservação de histórico
-
----
-
-## ⚠️ Limitações Conhecidas
-
-Por ser um projeto educacional, algumas simplificações foram adotadas:
-
-* não há rate limiting
-* não há refresh tokens
-* não há paginação em listagens
-* não há auditoria de alterações
-
-Essas limitações foram mantidas intencionalmente para priorizar
-clareza de arquitetura e foco em regras de negócio.
-
----
-
-## 🚀 Possíveis Evoluções
-
-### 🔐 Segurança
-
-* refresh tokens
-* logout (blacklist de tokens)
-* rate limiting
-
-### 📦 API
-
-* paginação em endpoints
-* padronização de erros
-* versionamento mais robusto
-
-### 🧠 Regras de Negócio
-
-* escopo de manager por equipe/departamento
-* permissões mais granulares
-* auditoria de alterações
-
-### 📄 Documentação
-
-* OpenAPI / Swagger
-* fluxos completos da API
-
----
-
-## 🐛 Troubleshooting
-
-**401 Unauthorized**
-Token inválido ou expirado → faça login novamente
-
-**403 Forbidden**
-Sem permissão → verifique seu role
-
-**422 Unprocessable Entity**
-Dados inválidos → revise payload
-
----
-
-## 📝 Notas
-
-* endpoints protegidos requerem autenticação
-* tokens expiram em 24h
-* email é case-insensitive
-* senha mínima de 6 caracteres
-
----
-
-## 👤 Autor
-
-Tibério dos Santos Ferreira
-GitHub: @tibas-ce
-
----
-
-## 📄 Licença
-
-MIT
+**Licença:** MIT
