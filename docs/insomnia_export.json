@@ -1,0 +1,31 @@
+{
+    "_type": "export",
+    "__export_format": 4,
+    "resources": [
+        {
+            "_id": "wrk_1",
+            "parentId": null,
+            "modified": 1713360000000,
+            "created": 1713360000000,
+            "name": "Core People API",
+            "description": "API responsável pelo gerenciamento de colaboradores, incluindo consulta, cadastro e atualização de dados.",
+            "_type": "workspace"
+        },
+        {
+            "_id": "req_1",
+			"parentId": "wrk_1",
+            "description": "Retorna a lista de colaboradores ativos, ordenados por nome em ordem crescente. Requer autenticação via token Bearer.",
+			"url": "{{ _.base_url }}/employees",
+			"name": "Get Employees",
+			"method": "GET",
+			"parameters": [
+				{ "name": "status", "value": "active" },
+				{ "name": "sort", "value": "name:asc" }
+			],
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" }
+			],
+			"_type": "request"
+        }
+    ]
+}
